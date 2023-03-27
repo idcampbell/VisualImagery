@@ -5,3 +5,6 @@ To create the conda environment for this project run:
 conda env create -f psychopy.yml
 conda activate psychopy
 ```
+
+## Experimental design
+![image](design.png)
