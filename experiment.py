@@ -3,6 +3,7 @@ from random import randint, sample
 from glob import glob
 from PIL import Image
 from psychopy import core, prefs, visual, sound
+from psychopy.sound.backend_ptb import SoundPTB as Sound
 import librosa
 
 
@@ -38,7 +39,10 @@ def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0,
         img_stim.draw()
         # Prepare the audio stimulus.
         audio_vec = audio_stimuli[stim][0].reshape(-1,1)
-        audio_data = sound.AudioClip(audio_vec)
+        sr = audio_stimuli[stim][1]
+        print(sr)
+        print('Using %s (with %s) for sounds' % (sound.audioLib, sound.audioDriver))
+        audio_data = sound.AudioClip(audio_vec, sampleRateHz=sr)
         audio_stim = sound.Sound(audio_data)
         flip_hook = window.getFutureFlipTime(clock='ptb')
         audio_stim.play(when=flip_hook)
@@ -54,7 +58,7 @@ if __name__=='__main__':
  
     # Needed to make the audio actually play...
     sound.setDevice(dev=0, kind='output')
-    prefs.hardware['audioLib'] = ['PTB']
+    #prefs.hardware['audioLib'] = ['ptb']
 
     # Load the stimuli.
     face_img_paths = sorted(glob('Stimuli/Images/People/*'))
