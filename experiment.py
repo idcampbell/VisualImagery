@@ -16,7 +16,6 @@ def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0,
             stim_len (float, optional): Number of seconds to present each stimuli.
             cond (str, optional): Experimental condition (e.g. open or closed).
     '''
-
     # Display/play the miniblock cue.
     if cond=='open':
         message = visual.TextStim(window, text='Open your eyes')
@@ -27,7 +26,6 @@ def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0,
     message.draw()
     window.flip()
     core.wait(stim_len)
-
     # Present the stimuli for the miniblock.
     stim_keys = list(img_stimuli.keys())
     block_stims = sample(stim_keys, n_stimuli)
@@ -75,7 +73,11 @@ if __name__=='__main__':
         win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
         win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
         win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
-
+        # Add a fixation period
+        message = visual.TextStim(win, text='+')
+        message.draw()
+        win.flip()
+        core.wait(8.0)
 
     # Clean things up.
     win.close()
