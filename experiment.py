@@ -4,7 +4,6 @@ from glob import glob
 from PIL import Image
 from psychopy import core, prefs, visual, sound
 import librosa
-prefs.hardware['audioLib'] = ['PTB']
 
 
 def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0, cond='open'):
@@ -55,6 +54,7 @@ if __name__=='__main__':
  
     # Needed to make the audio actually play...
     sound.setDevice(dev=0, kind='output')
+    prefs.hardware['audioLib'] = ['PTB']
 
     # Load the stimuli.
     face_img_paths = sorted(glob('Stimuli/Images/People/*'))
@@ -69,10 +69,11 @@ if __name__=='__main__':
     # Run the experiment.
     n_blocks = 1
     for _ in range(n_blocks):
-        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
-        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
         win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
         win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
+        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
+        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
+        
         # Add a fixation period
         message = visual.TextStim(win, text='+')
         message.draw()
