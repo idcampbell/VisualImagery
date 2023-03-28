@@ -17,32 +17,27 @@ def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0,
             cond (str, optional): Experimental condition (e.g. open or closed).
     '''
     # Display/play the miniblock cue.
-    if cond=='open':
-        message = visual.TextStim(window, text='Open your eyes')
-        #### TODO: PLAY AUDIO OF CUE ####
-    else:
-        message = visual.TextStim(window, text='Close your eyes')
-        #### TODO: PLAY AUDIO OF CUE ####
+    message = visual.TextStim(window, text=f'{cond} your eyes')
     message.draw()
+    cue_path = f'Stimuli/Audio/{cond}.wav'
+    cue_vec, sr = librosa.load(cue_path, sr=48000)
+    audio_data = sound.AudioClip(cue_vec.reshape(-1,1))
+    audio_stim = sound.Sound(audio_data)
+    flip_hook = window.getFutureFlipTime(clock='ptb')
+    audio_stim.play(when=flip_hook)
     window.flip()
-    core.wait(stim_len)
+    core.wait(stim_len+1.5)
     # Present the stimuli for the miniblock.
     stim_keys = list(img_stimuli.keys())
     block_stims = sample(stim_keys, n_stimuli)
     for stim in block_stims:
-        # Prepare the stimulus text.
-        txt_stim = visual.TextStim(window, text=stim, pos=(0.0, 0.8))
-        txt_stim.draw()
         # Prepare the image stimulus.
         img_stim = visual.ImageStim(window, image=img_stimuli[stim])
         img_stim.size = (1.2, 1.4) # NOTE: this looks approximately right to me, but may need to be adjusted.
         img_stim.draw()
         # Prepare the audio stimulus.
         audio_vec = audio_stimuli[stim][0].reshape(-1,1)
-        sr = audio_stimuli[stim][1]
-        print(sr)
-        print('Using %s (with %s) for sounds' % (sound.audioLib, sound.audioDriver))
-        audio_data = sound.AudioClip(audio_vec, sampleRateHz=sr)
+        audio_data = sound.AudioClip(audio_vec)
         audio_stim = sound.Sound(audio_data)
         flip_hook = window.getFutureFlipTime(clock='ptb')
         audio_stim.play(when=flip_hook)
@@ -58,7 +53,7 @@ if __name__=='__main__':
  
     # Needed to make the audio actually play...
     sound.setDevice(dev=0, kind='output')
-    #prefs.hardware['audioLib'] = ['ptb']
+    prefs.hardware['audioLib'] = ['ptb']
 
     # Load the stimuli.
     face_img_paths = sorted(glob('Stimuli/Images/People/*'))
@@ -67,16 +62,16 @@ if __name__=='__main__':
     letter_audio_paths = sorted(glob('Stimuli/Audio/Letters/*.wav'))
     face_imgs = {path.split('/')[-1].split('.jpg')[0].replace('_', ' '): Image.open(path) for path in face_img_paths}
     letter_imgs = {path.split('/')[-1].split('.jpg')[0].replace('_', ' '): Image.open(path) for path in letter_img_paths}
-    face_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path) for path in face_audio_paths}
-    letter_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path) for path in letter_audio_paths}
+    face_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in face_audio_paths}
+    letter_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in letter_audio_paths}
 
     # Run the experiment.
     n_blocks = 1
     for _ in range(n_blocks):
-        win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
-        win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
-        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='open')
-        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.0, cond='closed')
+        win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.5, cond='open')
+        win = run_miniblock(face_imgs, face_audio, win, n_stimuli=4, stim_len=1.5, cond='closed')
+        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.5, cond='open')
+        win = run_miniblock(letter_imgs, letter_audio, win, n_stimuli=4, stim_len=1.5, cond='closed')
         
         # Add a fixation period
         message = visual.TextStim(win, text='+')
