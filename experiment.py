@@ -3,7 +3,7 @@ from random import randint, sample
 from glob import glob
 from PIL import Image
 from psychopy import core, prefs, visual, sound
-from psychopy.sound.backend_ptb import SoundPTB as Sound
+from psychopy.hardware import keyboard
 import librosa
 
 
@@ -64,6 +64,14 @@ if __name__=='__main__':
     letter_imgs = {path.split('/')[-1].split('.jpg')[0].replace('_', ' '): Image.open(path) for path in letter_img_paths}
     face_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in face_audio_paths}
     letter_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in letter_audio_paths}
+
+    key_resp = keyboard.Keyboard()
+    while True:
+        resp = key_resp.get_keys(key_list=['equal'], waitRelease=False)
+        if len(resp):
+            print(resp)
+            break
+
 
     # Run the experiment.
     n_blocks = 1
