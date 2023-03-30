@@ -37,16 +37,17 @@ if __name__=='__main__':
     category_conds = [('F', 'F', 'L', 'L'), ('F', 'F', 'L', 'L'), ('L', 'L', 'F', 'F'), ('L', 'L', 'F', 'F')]
     eye_conds = [('O', 'C', 'O', 'C'), ('C', 'O', 'C', 'O'), ('O', 'C', 'O', 'C'), ('C', 'O', 'C', 'O')]
     # Loop over blocks and store the generated information to save later.
-    col_names = ['subject', 'block', 'miniblock', 'category', 'eye_cond', 'img_path', 'audio_path']
+    col_names = ['subject', 'block', 'miniblock', 'tinyblock', 'category', 'eye_cond', 'img_path', 'audio_path']
     results = []
     for ib in range(n_blocks):
         inds = np.random.choice(16, 16, replace=False).reshape(2,-1)
         # Loop over miniblocks.
         for im in range(4):
-            mb_df = pd.DataFrame(np.zeros([8*4, 7]), columns=col_names)
+            mb_df = pd.DataFrame(np.zeros([8*4, 8]), columns=col_names)
             mb_df.loc[:,'subject'] = subj_id
             mb_df.loc[:, 'block'] = ib+1
             mb_df.loc[:, 'miniblock'] = im+1+ib*4
+            mb_df.loc[:, 'tinyblock'] = np.repeat([1,2,3,4], 8)
             mb_df.loc[:, 'category'] = np.repeat(category_conds[im], 8)
             mb_df.loc[:, 'eye_cond'] = np.repeat(eye_conds[im], 8)
             # Get the proper stimulus file paths.
