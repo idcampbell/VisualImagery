@@ -34,7 +34,6 @@ def run_miniblock(img_stimuli, audio_stimuli, window, n_stimuli=4, stim_len=4.0,
     for stim in block_stims:
         # Prepare the image stimulus.
         img_stim = visual.ImageStim(window, image=img_stimuli[stim], size=(2.0, 2.0))
-        #img_stim.size = (1.2, 1.2) # NOTE: this looks approximately right to me, but may need to be adjusted.
         img_stim.draw()
         # Prepare the audio stimulus.
         audio_vec = audio_stimuli[stim][0].reshape(-1,1)
@@ -66,15 +65,14 @@ if __name__=='__main__':
     face_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in face_audio_paths}
     letter_audio = {path.split('/')[-1].split('.wav')[0].replace('_', ' '): librosa.load(path, sr=48000) for path in letter_audio_paths}
 
-    #### TEST SCANNER SYNCING ####
+    #### SCANNER SYNCING: May need to get rid of launch scan?? ####
     MR_settings = {'TR': 2.0, 'sync': 'equal', 'volumes': 10.0, 'skip': 0.0}
     launchScan(win, MR_settings, mode='test', wait_msg='Waiting for pulse.')
     key_resp = keyboard.Keyboard()
     while True:
-        allKeys = key_resp.getKeys(keyList=['equal', '5'], waitRelease=False)
+        allKeys = key_resp.getKeys(keyList=['equal'], waitRelease=False)
         if MR_settings['sync'] in allKeys:
             break
-
 
     # Run the experiment.
     n_blocks = 1
