@@ -1,4 +1,6 @@
 import argparse
+import os
+import warnings
 from glob import glob
 import numpy as np
 import pandas as pd
@@ -14,6 +16,8 @@ def parse_args():
     return args
 
 if __name__=='__main__':
+    # Stop deprecation warning bs they're annoying.
+    warnings.filterwarnings('ignore', category=DeprecationWarning)
     # Set a random seed.
     seed = 8888
     np.random.seed(seed)
@@ -22,30 +26,37 @@ if __name__=='__main__':
     subj_id = args.subjID
     n_blocks = args.nBlocks
     run_id = args.runID
-    print(subj_id)
-    # Store the generated information to save later.
-    col_names = ['subject', 'block', 'miniblock', 'stimulus', 'eye_cond', 'stim_category', 'stimulus_path']
-    df = pd.DataFrame(np.zeros([n_blocks*8*4*4, 7]), columns=col_names)
     # Grab the filenames for the stimuli.
     face_img_paths = np.array(sorted(glob('Stimuli/Images/People/*.jpg')))
     letters_img_paths = np.array(sorted(glob('Stimuli/Images/Letters/*.jpg')))
     face_audio_paths = np.array(sorted(glob('Stimuli/Audio/People/*.wav')))
     letters_audio_paths = np.array(sorted(glob('Stimuli/Audio/Letters/*.wav')))
+    audio_paths = np.stack([face_audio_paths, letters_audio_paths])
+    img_paths = np.stack([face_img_paths, letters_img_paths])
     # Explicitely define the miniblock structure.
-    cat_cond = ['F', 'L', 'F', 'L', 'L', 'F', 'L', 'F']
-    eye_pair = [('O', 'C'), ('O', 'C'), ('C', 'O'), ('C', 'O'), ('O', 'C'), ('O', 'C'), ('C', 'O'), ('C', 'O')]
-    # Loop over blocks.
-    i = 0
+    category_conds = [('F', 'F', 'L', 'L'), ('F', 'F', 'L', 'L'), ('L', 'L', 'F', 'F'), ('L', 'L', 'F', 'F')]
+    eye_conds = [('O', 'C', 'O', 'C'), ('C', 'O', 'C', 'O'), ('O', 'C', 'O', 'C'), ('C', 'O', 'C', 'O')]
+    # Loop over blocks and store the generated information to save later.
+    col_names = ['subject', 'block', 'miniblock', 'category', 'eye_cond', 'img_path', 'audio_path']
+    results = []
     for ib in range(n_blocks):
-        inds = np.random.choice(16, 16, replace=False)
-        inds1, inds2 = inds[:8], inds[8:]
+        inds = np.random.choice(16, 16, replace=False).reshape(2,-1)
         # Loop over miniblocks.
         for im in range(4):
-            mini = miniblocks[i]
-            for tini in mini:
-                df, i = populate_df(df, eye_cond, pair, stimuli)
-                
-
-
-def populate_df(df, eye_cond, pair, stimuli, i):
-
+            mb_df = pd.DataFrame(np.zeros([8*4, 7]), columns=col_names)
+            mb_df.loc[:,'subject'] = subj_id
+            mb_df.loc[:, 'block'] = ib+1
+            mb_df.loc[:, 'miniblock'] = im+1+ib*4
+            mb_df.loc[:, 'category'] = np.repeat(category_conds[im], 8)
+            mb_df.loc[:, 'eye_cond'] = np.repeat(eye_conds[im], 8)
+            # Get the proper stimulus file paths.
+            eye_cond_inds = (np.array(eye_conds[im])=='O').astype(int)
+            stim_cond_inds = (np.array(category_conds[im])=='F').astype(int)
+            mb_stim_inds = inds[eye_cond_inds,:].ravel()
+            mb_df.loc[:, 'audio_path'] = audio_paths[stim_cond_inds,:][np.repeat([0,1,2,3], 8), mb_stim_inds]
+            mb_df.loc[:, 'img_path'] = img_paths[stim_cond_inds,:][np.repeat([0,1,2,3], 8), mb_stim_inds]
+            results.append(mb_df)
+    # Save the dataframe.
+    results_df = pd.concat(results).reset_index(drop=True)
+    os.makedirs('Stimuli/CSVs', exist_ok=True)
+    results_df.to_csv(os.path.join('Stimuli/CSVs', f'{subj_id}_run{run_id}.csv'))
