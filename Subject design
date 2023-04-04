@@ -1,0 +1,7 @@
+Wednesday: goal 3 blocks/runs per subject: 
+runID=1: 2 blocks (according to dec CSV), correct orientation, 
+runID=2: 1 blocks, inverted visual imagery (give instructions over mic)
+
+_____
+2 tr delay from first machine pulse to first instruction
+TODO: confirm launch scan settings with sam/isaac: TRS, TIs, delay etc. 
